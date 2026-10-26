@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUMO | Ruang Emosi</title>
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Inter & Plus Jakarta Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  
+  .choice-btn {
+    transition: all 0.2s ease-in-out;
+  }
+  .choice-btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Animasi Modal */
+  .modal-backdrop {
+    animation: fadeIn 0.2s ease-out forwards;
+  }
+  .modal-card {
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Sembunyikan elemen tertentu saat dicetak */
+  @media print {
+    .no-print, nav, header { display: none !important; }
+    .panel { display: block !important; box-shadow: none; border: 1px solid #ccc; margin-bottom: 20px;}
+    body { background: white; }
+  }
+</style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- HEADER -->
+  <header class="bg-slate-900 text-white relative overflow-hidden shadow-lg border-b border-slate-800">
+    <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-600/20 blur-3xl pointer-events-none"></div>
+    <div class="absolute left-1/3 -bottom-20 w-80 h-80 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <i class="fa-solid font-bold fa-heart-pulse"></i> SEL Informatika
+          </span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mt-2 text-white">RUMO</h1>
+        <p class="text-blue-100/80 text-base sm:text-lg mt-1 max-w-xl font-medium">
+          <strong class="text-white">Ruang Emosi</strong> · Kenali perasaanmu. Refleksikan pengalaman belajarmu.
+        </p>
+      </div>
+
+      <!-- Quick Script URL Config Trigger -->
+      <div class="no-print self-start md:self-auto">
+        <button id="toggleConfigBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-xl border border-slate-700 flex items-center gap-2 transition">
+          <i class="fa-solid fa-gear text-blue-400"></i>
+          <span>Pengaturan URL</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Script URL Setting Drawer -->
+    <div id="configDrawer" class="hidden bg-slate-950 border-t border-slate-800 px-4 sm:px-6 py-4 text-xs no-print">
+      <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <label for="scriptUrlInput" class="text-slate-300 font-medium whitespace-nowrap">URL Apps Script:</label>
+        <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="flex-grow bg-slate-900 border border-slate-700 text-slate-100 px-3 py-2 rounded-lg font-mono focus:outline-none focus:border-blue-500">
+        <button id="saveUrlBtn" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition">Simpan</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full">
+
+    <!-- NAVIGATION TABS -->
+    <nav class="flex flex-wrap gap-2 mb-8 no-print" aria-label="Navigasi RUMO">
+      <!-- Tombol Beranda (Aktif by default) -->
+      <button class="nav-btn bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-bold border border-transparent shadow-md transition-all flex items-center gap-2" data-panel="home">
+        <i class="fa-solid fa-house"></i> Beranda
+      </button>
+      <button class="nav-btn bg-white text-slate-700 px-5 py-2.5 rounded-full text-sm font-bold border border-slate-200 hover:border-blue-500 transition-all flex items-center gap-2" data-panel="checkin">
+        <i class="fa-solid fa-face-smile"></i> 1 · Check-in Emosi
+      </button>
+      <button class="nav-btn bg-white text-slate-700 px-5 py-2.5 rounded-full text-sm font-bold border border-slate-200 hover:border-blue-500 transition-all flex items-center gap-2" data-panel="reflection">
+        <i class="fa-solid fa-pen-to-square"></i> 2 · Refleksi Belajar
+      </button>
+    </nav>
+
+    <!-- PANEL 1: HOME -->
+    <section id="home" class="panel bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+      <div>
+        <span class="text-blue-600 font-extrabold text-xs uppercase tracking-wider block mb-1">Selamat Datang</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Berikan ruang untuk dirimu.</h2>
+      </div>
+
+      <p class="text-slate-600 text-base leading-relaxed max-w-3xl">
+        <strong>RUMO</strong> adalah media refleksi sederhana yang bisa digunakan selama pembelajaran Informatika. Tidak ada emosi yang salah. Tujuannya bukan menilai perasaanmu, melainkan membantumu mengenali kebutuhan dan memilih langkah belajar yang sesuai.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+        <div class="p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex flex-col justify-between">
+          <div>
+            <span class="inline-block bg-blue-200/60 text-blue-800 text-xs font-bold px-3 py-1 rounded-full mb-3">01 · Kenali</span>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Check-in Emosi</h3>
+            <p class="text-slate-600 text-sm">Perhatikan perasaanmu sebelum atau saat belajar dimulai.</p>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex flex-col justify-between">
+          <div>
+            <span class="inline-block bg-indigo-200/60 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full mb-3">02 · Refleksi</span>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Lihat Kembali</h3>
+            <p class="text-slate-600 text-sm">Kenali pengalaman belajarmu dan tentukan langkah berikutnya.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-slate-600 text-sm leading-relaxed flex items-start gap-3">
+        <i class="fa-solid fa-shield-halved text-blue-500 text-lg mt-0.5"></i>
+        <div>
+          <strong class="text-slate-800 block mb-0.5">Privasi dan kenyamanan:</strong>
+          Jawaban baru dikirim setelah kamu memilih tombol kirim. Kamu boleh melewati pertanyaan dan tidak perlu menulis informasi pribadi yang sensitif. Media ini bukan alat diagnosis.
+        </div>
+      </div>
+
+      <div class="pt-2 no-print">
+        <button class="bg-slate-900 hover:bg-blue-600 text-white font-bold px-6 py-3.5 rounded-xl shadow-md transition flex items-center gap-2" data-go="checkin">
+          Mulai RUMO <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- PANEL 2: CHECK-IN -->
+    <section id="checkin" class="panel hidden bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+      <div>
+        <span class="text-blue-600 font-extrabold text-xs uppercase tracking-wider block mb-1">Tahap 1 · Kenali</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Bagaimana perasaanmu saat ini?</h2>
+        <p class="text-slate-500 text-sm mt-1">Pilih satu atau beberapa pilihan yang paling mendekati perasaanmu.</p>
+      </div>
+
+      <!-- EMOTION GRID -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Senang">
+          <span class="text-3xl block mb-1">😊</span>
+          <strong class="block text-slate-800 text-sm">Senang</strong>
+          <small class="text-slate-500 text-xs block">Aku merasa positif</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Tenang">
+          <span class="text-3xl block mb-1">😌</span>
+          <strong class="block text-slate-800 text-sm">Tenang</strong>
+          <small class="text-slate-500 text-xs block">Aku cukup siap</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Antusias">
+          <span class="text-3xl block mb-1">🤩</span>
+          <strong class="block text-slate-800 text-sm">Antusias</strong>
+          <small class="text-slate-500 text-xs block">Aku ingin mencoba</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Bingung">
+          <span class="text-3xl block mb-1">🤔</span>
+          <strong class="block text-slate-800 text-sm">Bingung</strong>
+          <small class="text-slate-500 text-xs block">Perlu memahami lagi</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Khawatir">
+          <span class="text-3xl block mb-1">😟</span>
+          <strong class="block text-slate-800 text-sm">Khawatir</strong>
+          <small class="text-slate-500 text-xs block">Ada yang kupikirkan</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Frustrasi">
+          <span class="text-3xl block mb-1">😤</span>
+          <strong class="block text-slate-800 text-sm">Frustrasi</strong>
+          <small class="text-slate-500 text-xs block">Situasi terasa sulit</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Lelah">
+          <span class="text-3xl block mb-1">😴</span>
+          <strong class="block text-slate-800 text-sm">Lelah</strong>
+          <small class="text-slate-500 text-xs block">Energi terasa rendah</small>
+        </button>
+        <button class="choice-btn border-2 border-slate-200 rounded-2xl p-4 text-center bg-white hover:border-blue-400 focus:outline-none" data-emotion="Lainnya">
+          <span class="text-3xl block mb-1">🌦️</span>
+          <strong class="block text-slate-800 text-sm">Lainnya</strong>
+          <small class="text-slate-500 text-xs block">Sulit menamai perasaan</small>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Input Kelas dihilangkan sesuai permintaan -->
+        <div>
+          <label for="need" class="block font-bold text-slate-800 text-sm mb-1.5">Apa yang mungkin kamu butuhkan agar bisa belajar hari ini? (opsional)</label>
+          <textarea id="need" rows="3" placeholder="Contoh: instruksi yang lebih jelas, waktu untuk memahami..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 text-sm resize-y"></textarea>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 pt-2 no-print">
+        <button id="saveCheckin" class="bg-slate-900 hover:bg-blue-600 text-white font-bold px-5 py-3 rounded-xl text-sm transition flex items-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Kirim Jawaban
+        </button>
+        <button class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-5 py-3 rounded-xl text-sm transition" data-go="reflection">
+          Lanjut ke refleksi →
+        </button>
+      </div>
+
+      <div id="checkinResult" class="hidden p-4 rounded-xl border-l-4 border-emerald-500 bg-emerald-50 text-slate-700 text-sm mt-4"></div>
+    </section>
+
+    <!-- PANEL 3: REFLECTION -->
+    <section id="reflection" class="panel hidden bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+      <div>
+        <span class="text-blue-600 font-extrabold text-xs uppercase tracking-wider block mb-1">Tahap 2 · Refleksi</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">Apa yang kamu pelajari dari pengalamanmu?</h2>
+        <p class="text-slate-500 text-sm mt-1">Refleksi membantu melihat proses belajar, bukan hanya benar atau salahnya jawaban.</p>
+      </div>
+
+      <div class="space-y-5">
+        <div>
+          <label for="emotionReflect" class="block font-bold text-slate-800 text-sm mb-1.5">1. Emosi apa yang paling terasa selama pembelajaran?</label>
+          <input type="text" id="emotionReflect" placeholder="Contoh: bingung, tertantang, lega..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 text-sm">
+        </div>
+
+        <div>
+          <label for="moment" class="block font-bold text-slate-800 text-sm mb-1.5">2. Pada situasi apa emosi itu muncul?</label>
+          <textarea id="moment" rows="3" placeholder="Contoh: saat algoritma belum berjalan sesuai harapan..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 text-sm resize-y"></textarea>
+        </div>
+
+        <div>
+          <label for="action" class="block font-bold text-slate-800 text-sm mb-1.5">3. Strategi apa yang kamu coba atau ingin coba?</label>
+          <textarea id="action" rows="3" placeholder="Contoh: memeriksa langkah algoritma, lalu meminta umpan balik..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 text-sm resize-y"></textarea>
+        </div>
+
+        <div>
+          <label for="next" class="block font-bold text-slate-800 text-sm mb-1.5">4. Apa langkah kecil yang akan kamu lakukan berikutnya?</label>
+          <textarea id="next" rows="3" placeholder="Tuliskan satu langkah yang realistis..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-800 text-sm resize-y"></textarea>
+        </div>
+      </div>
+
+      <!-- HAPUS TOMBOL CETAK DI SINI, GANTI MENJADI KIRIM REFLEKSI -->
+      <div class="flex flex-wrap gap-3 pt-3 no-print">
+        <button id="makeSummary" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-5 py-3 rounded-xl text-sm transition flex items-center gap-2">
+          <i class="fa-solid fa-list-check"></i> Lihat Rangkuman
+        </button>
+        <button id="sendRumo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-xl text-sm transition flex items-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Kirim Refleksi
+        </button>
+      </div>
+
+      <!-- SUMMARY BOX -->
+      <div id="summary" class="hidden bg-blue-50/70 border border-blue-200/80 rounded-2xl p-6 mt-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900 border-b border-blue-200 pb-2 flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-list text-blue-600"></i> Rangkuman RUMO-ku
+        </h3>
+        <div id="summaryText" class="space-y-3 text-sm text-slate-700"></div>
+        <div class="no-print pt-2">
+          <button id="clearAll" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2 rounded-lg text-xs transition border border-red-200">
+            <i class="fa-solid fa-trash-can"></i> Hapus data form
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- POP-UP MODAL DIALOG (Notifikasi Simulasi Pengiriman/Error) -->
+  <div id="popupModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden modal-backdrop">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 modal-card text-center relative overflow-hidden">
+      <div id="modalIconContainer" class="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 text-3xl">
+        <i id="modalIcon" class="fa-solid fa-circle-check"></i>
+      </div>
+      
+      <h3 id="modalTitle" class="text-xl font-extrabold text-slate-900 mb-2">Notifikasi</h3>
+      <p id="modalMessage" class="text-slate-600 text-sm leading-relaxed mb-6">Pesan notifikasi di sini...</p>
+      
+      <button id="closeModalBtn" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl transition text-sm shadow-md">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 text-center py-6 text-xs text-slate-500 no-print mt-8">
+    <p>RUMO · Ruang Emosi | Media refleksi sosial emosional untuk pembelajaran Informatika</p>
+  </footer>
+
+<script>
+  // ================= STATE & VARIABEL =================
+  let GOOGLE_SCRIPT_URL = "";
+  const chosen = new Set();
+
+  // ================= SISTEM NAVIGASI =================
+  const panels = document.querySelectorAll('.panel');
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const goBtns = document.querySelectorAll('[data-go]');
+
+  function showPanel(panelId) {
+    // Sembunyikan semua panel
+    panels.forEach(p => p.classList.add('hidden'));
+    
+    // Tampilkan panel yang diklik
+    const targetPanel = document.getElementById(panelId);
+    if(targetPanel) targetPanel.classList.remove('hidden');
+
+    // Ubah styling tombol menu nav agar yang aktif terlihat menonjol (Biru)
+    navBtns.forEach(btn => {
+      if (btn.dataset.panel === panelId) {
+        btn.classList.add('bg-blue-600', 'text-white', 'shadow-md', 'border-transparent');
+        btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+      } else {
+        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'border-transparent');
+        btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+      }
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Event listener tombol menu di Atas
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+  });
+
+  // Event listener untuk tombol "Lanjut" (Mulai RUMO -> Checkin -> Refleksi)
+  goBtns.forEach(btn => {
+    btn.addEventListener('click', () => showPanel(btn.dataset.go));
+  });
+
+
+  // ================= SISTEM PILIHAN EMOSI =================
+  const emotionBtns = document.querySelectorAll('.choice-btn');
+  emotionBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const emotion = btn.dataset.emotion;
+      if (chosen.has(emotion)) {
+        chosen.delete(emotion); // Batal Pilih
+        btn.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
+        btn.classList.add('border-slate-200', 'bg-white');
+      } else {
+        chosen.add(emotion); // Pilih
+        btn.classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
+        btn.classList.remove('border-slate-200', 'bg-white');
+      }
+    });
+  });
+
+
+  // ================= SISTEM POP-UP MODAL =================
+  const modal = document.getElementById('popupModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalIconContainer = document.getElementById('modalIconContainer');
+
+  function showPopUp(title, message, type) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    if (type === 'success') {
+      modalIcon.className = 'fa-solid fa-circle-check';
+      modalIconContainer.className = 'w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-3xl';
+    } else if (type === 'warning') {
+      modalIcon.className = 'fa-solid fa-triangle-exclamation';
+      modalIconContainer.className = 'w-16 h-16 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-3xl';
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  // Tutup Modal
+  document.getElementById('closeModalBtn').addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+
+
+  // ================= LOGIKA PENGIRIMAN DATA =================
+  
+  // 1. Tombol Kirim Jawaban (Check-in)
+  document.getElementById('saveCheckin').addEventListener('click', () => {
+    const needText = document.getElementById('need').value.trim();
+
+    // Validasi Jika Kosong
+    if (chosen.size === 0 && !needText) {
+      showPopUp(
+        'Data Belum Terkirim ⚠️', 
+        'Pilih setidaknya satu jenis emosi atau isi kebutuhan belajarmu terlebih dahulu.', 
+        'warning'
+      );
+      return; // Berhenti eksekusi jika kosong
+    }
+
+    // Jika valid, Tampilkan sukses simulasi
+    showPopUp(
+      'Jawaban Terkirim! 🎉', 
+      'Terima kasih! Jawaban Check-in emosi kamu telah berhasil terkirim.', 
+      'success'
+    );
+
+    // Kirim diam-diam di background (hanya jika URL dikonfigurasi)
+    if (GOOGLE_SCRIPT_URL.startsWith('http')) {
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ emosiCheckin: [...chosen].join(', '), kebutuhan: needText })
+      }).catch(()=> {});
+    }
+  });
+
+
+  // 2. Tombol Kirim Refleksi
+  document.getElementById('sendRumo').addEventListener('click', () => {
+    const eRef = document.getElementById('emotionReflect').value.trim();
+    const mom = document.getElementById('moment').value.trim();
+    const act = document.getElementById('action').value.trim();
+    const nxt = document.getElementById('next').value.trim();
+
+    // Validasi Jika Refleksi Kosong
+    if (!eRef && !mom && !act && !nxt) {
+      showPopUp(
+        'Data Belum Terkirim ⚠️', 
+        'Harap isi setidaknya satu kolom pertanyaan refleksi sebelum mengirim.', 
+        'warning'
+      );
+      return;
+    }
+
+    // Jika valid, Tampilkan sukses simulasi
+    showPopUp(
+      'Refleksi Terkirim! 🌟', 
+      'Hebat! Refleksi belajarmu hari ini berhasil terkirim. Teruslah berproses.', 
+      'success'
+    );
+
+    // Kirim diam-diam (hanya jika URL dikonfigurasi)
+    if (GOOGLE_SCRIPT_URL.startsWith('http')) {
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ 
+          emosiRefleksi: eRef, situasi: mom, strategi: act, langkahBerikutnya: nxt 
+        })
+      }).catch(()=> {});
+    }
+  });
+
+
+  // ================= LOGIKA RANGKUMAN & LAINNYA =================
+  
+  // Fungsi kecil pembantu untuk teks HTML
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function val(id) { return document.getElementById(id).value.trim() || '-'; }
+
+  // Buat Rangkuman
+  document.getElementById('makeSummary').addEventListener('click', () => {
+    const rows = [
+      ['Emosi Check-in', chosen.size ? [...chosen].join(', ') : '-'],
+      ['Kebutuhan Belajar', val('need')],
+      ['Emosi saat belajar', val('emotionReflect')],
+      ['Situasi', val('moment')],
+      ['Strategi', val('action')],
+      ['Langkah berikutnya', val('next')]
+    ];
+
+    document.getElementById('summaryText').innerHTML = rows.map(([a, b]) => 
+      `<div class="bg-white p-3 rounded-xl border border-slate-200">
+        <strong class="text-blue-600 block text-xs uppercase tracking-wide">${a}</strong>
+        <span class="text-slate-800 text-sm font-medium mt-0.5 block">${escapeHtml(b)}</span>
+      </div>`
+    ).join('');
+    
+    document.getElementById('summary').classList.remove('hidden');
+  });
+
+  // Hapus Data
+  document.getElementById('clearAll').addEventListener('click', () => {
+    document.querySelectorAll('textarea, input[type="text"]').forEach(x => x.value = '');
+    chosen.clear();
+    emotionBtns.forEach(btn => {
+      btn.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
+      btn.classList.add('border-slate-200', 'bg-white');
+    });
+    document.getElementById('summary').classList.add('hidden');
+    showPopUp('Data Dihapus', 'Isi form RUMO telah dibersihkan dari perangkat ini.', 'success');
+  });
+
+  // Drawer Pengaturan URL
+  document.getElementById('toggleConfigBtn').addEventListener('click', () => {
+    document.getElementById('configDrawer').classList.toggle('hidden');
+  });
+  document.getElementById('saveUrlBtn').addEventListener('click', () => {
+    GOOGLE_SCRIPT_URL = document.getElementById('scriptUrlInput').value.trim();
+    document.getElementById('configDrawer').classList.add('hidden');
+    showPopUp('Pengaturan Tersimpan', 'URL Google Apps Script telah berhasil dipasang untuk sesi ini.', 'success');
+  });
+
+</script>
+</body>
+</html>
